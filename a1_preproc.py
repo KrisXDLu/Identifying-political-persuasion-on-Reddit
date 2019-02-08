@@ -7,11 +7,11 @@ import re
 import spacy
 import html
 
-# indir = '/u/cs401/A1/data/';
-indir = './CSC401A1/data/'
+indir = '/u/cs401/A1/data/';
+# indir = './CSC401A1/data/'
 nlp_1001299944 = spacy.load('en', disable=['parser', 'ner'])
 #[\s\w]
-home = './CSC401A1/'
+home = './'
 f = open(home +'wordlists/abbrev.english')
 abbrev_1001299944 = f.readlines()
 abbrev_1001299944 = [x.strip() for x in abbrev_1001299944]
@@ -110,6 +110,7 @@ def preproc1( comment , steps=range(1,11)):
             word, tag = item.strip().rsplit("/", 1)
             if len(word)>0 and (word in abbrev_1001299944 or tag in eos ):
                 if (w+1) >= len(words):
+                    words[w] += '\n'
                     continue
                 if words[w+1][0].isupper() and not words[w+1] in abbrev_1001299944:
                     words[w] += '\n'
@@ -171,21 +172,6 @@ def main( args ):
     fout.close()
 
 if __name__ == "__main__":
-    # nlp = spacy.load(’en’, disable=[’parser’, ’ner’])
-    # utt = nlp_1001299944(u"Go to St. John’s St. John is there.")
-    # for token in utt:
-    #     print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
-    #     token.shape_, token.is_alpha, token.is_stop)
-    # Go go VERB VB  Xx True False
-    # to to ADP IN  xx True True
-    # St. st. PROPN NNP  Xx. False False
-    # John john PROPN NNP  Xxxx True False
-    # ’s ’s PART POS  ’x False False
-    # St. st. PROPN NNP  Xx. False False
-    # John john PROPN NNP  Xxxx True False
-    # is be VERB VBZ  xx True True
-    # there there ADV RB  xxxx True True
-    # . . PUNCT .  . False False
 
     parser = argparse.ArgumentParser(description='Process each .')
     parser.add_argument('ID', metavar='N', type=int, nargs=1,
