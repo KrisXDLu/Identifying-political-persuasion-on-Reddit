@@ -64,8 +64,7 @@ def preproc1( comment , steps=range(1,11)):
         for item in words:
             if item not in abbrev_1001299944:
                 add = ' '.join([x.strip() for x in re.split(regexStr, item) if x])
-                print(add)
-                modComm += add      
+                modComm += add + " "      
 
     if 5 in steps:
         # split clitics using whitespace
@@ -78,7 +77,8 @@ def preproc1( comment , steps=range(1,11)):
         utt = nlp_1001299944(modComm)
         modComm = ''
         for token in utt:
-            modComm += token.text + "/" + token.tag_ + " "
+            if len(token.text) > 0:
+                modComm += token.text + "/" + token.tag_ + " "
         modComm = modComm.strip()
     if 7 in steps:
         #remove stop words
@@ -93,11 +93,11 @@ def preproc1( comment , steps=range(1,11)):
             token, tag = item.rsplit("/", 1)
             utt = nlp_1001299944(token)
             if len(utt) > 0:
-                if (len(utt) > 0 and not utt[0].lemma_.startswith('-') and utt[0].lemma_ != token[0].lower()):
+                if not utt[0].lemma_.startswith('-') and utt[0].lemma_ != token[0].lower():
                     modComm += utt[0].lemma_
                 else:
                     modComm += token
-            modComm += "/" + tag + " "
+                modComm += "/" + tag + " "
         modComm.strip()
     
     if 9 in steps:
@@ -108,10 +108,7 @@ def preproc1( comment , steps=range(1,11)):
         for w in range(len(words)):
             item = words[w]
             word, tag = item.strip().rsplit("/", 1)
-            print(9)
-            print(word)
-            print(tag)
-            if word in abbrev_1001299944 or tag in eos :
+            if len(word)>0 and (word in abbrev_1001299944 or tag in eos ):
                 if (w+1) >= len(words):
                     continue
                 if words[w+1][0].isupper() and not words[w+1] in abbrev_1001299944:
@@ -144,10 +141,18 @@ def main( args ):
             startInd = ID%size
             endInd = startInd + args.max
             filename  = os.path.basename(fullFile)
-            print(size)
-            print(startInd)
-            print(endInd)
+            # print(size)
+            # print(startInd)
+            # print(endInd)
+            count = 1
+            total = endInd-startInd
+
             for i in range(startInd, endInd):
+                # percentage = count/total
+                # if str(percentage*10)[2] == '0':
+                #     print(str(percentage*100) + "%")
+                if count == 100:
+                    print(i-startInd)
             # read those lines with something like `j = json.loads(line)`
                 comment = json.loads(data[i])
                 newCom = {}
@@ -160,7 +165,7 @@ def main( args ):
                 newCom['cat'] = filename
             # append the result to 'allOutput'
                 allOutput.append(newCom)
-            
+                count+=1;
     fout = open(args.output, 'w')
     fout.write(json.dumps(allOutput))
     fout.close()
