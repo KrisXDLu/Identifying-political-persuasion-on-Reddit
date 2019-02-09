@@ -7,19 +7,20 @@ import re
 import spacy
 import html
 
-indir = '/u/cs401/A1/data/';
-# indir = './CSC401A1/data/'
+# indir = '/u/cs401/A1/data/';
+indir = './data/'
 nlp_1001299944 = spacy.load('en', disable=['parser', 'ner'])
 #[\s\w]
+# home = '/u/cs401/'
 home = './'
-f = open(home +'wordlists/abbrev.english')
+f = open(home +'Wordlists/abbrev.english')
 abbrev_1001299944 = f.readlines()
 abbrev_1001299944 = [x.strip() for x in abbrev_1001299944]
-f = open(home+'wordlists/clitics')
+f = open(home+'Wordlists/clitics')
 clitics_1001299944 = f.readlines()
 clitics_1001299944 = [x.strip() for x in clitics_1001299944]
 f.close()
-f = open(home+'wordlists/StopWords')
+f = open(home+'Wordlists/StopWords')
 stopWords_1001299944 = f.readlines()
 stopWords_1001299944 = [x.strip() for x in stopWords_1001299944]
 f.close()
@@ -124,7 +125,7 @@ def preproc1( comment , steps=range(1,11)):
             modComm += word.lower() + "/" + tag + " "
         modComm.strip()
         
-    return modComm
+    return modComm.strip()
 
 def main( args ):
     print(args)
@@ -152,7 +153,7 @@ def main( args ):
                 # percentage = count/total
                 # if str(percentage*10)[2] == '0':
                 #     print(str(percentage*100) + "%")
-                if count == 100:
+                if count % 50 == 0:
                     print(i-startInd)
             # read those lines with something like `j = json.loads(line)`
                 comment = json.loads(data[i])
