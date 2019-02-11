@@ -5,10 +5,12 @@ import os
 import json
 import re
 import csv
+import string
 
 def strToFloat_luxiaodi(data):
+    # print(data)
     r = 0.0
-    if data != ""
+    if data != "":
         r = float(data)
     return r
 # fodir = '/u/cs401/Wordlists/'
@@ -53,7 +55,7 @@ CCPattern_luxiaodi = re.compile("\/CC" + "($| )")
 # past tense
 vbdPattern_luxiaodi = re.compile("\/VBD" + "($| )")
 
-futurePattern_luxiaodi = re.compile("(^| )" + "('ll\/|(will\/|gonna\/|going\/VBG to\/TO \w\/VB)") 
+futurePattern_luxiaodi = re.compile("(^| )" + "('ll\/|will\/|gonna\/|going\/VBG to\/TO \w\/VB)") 
 # commas
 commaPattern_luxiaodi = re.compile("(^| )" + "\,\/")
 # multiple punctuation
@@ -72,16 +74,16 @@ slangPattern_luxiaodi = re.compile(slangRe_luxiaodi)
 upwordsPattern_luxiaodi = re.compile("( |^)[A-Z]{3,}\/")
 notPuncOnlyPattern_luxiaodi = re.compile("[^\s\/]{0,}" + "[0-9a-zA-Z]" + "[^\s\/]{0,}\/")
 
-bGL_luxiaodi = {strToFloat_luxiaodi(line[1]): 
+bGL_luxiaodi = {line[1]: 
         [strToFloat_luxiaodi(line[3]), strToFloat_luxiaodi(line[4]), 
         strToFloat_luxiaodi(line[5])] 
         for line in csv.reader(
-            open('BristolNorms+GilhoolyLogie.csv', "r"), delimiter=',') 
+            open(fodir + 'BristolNorms+GilhoolyLogie.csv', "r"), delimiter=',') 
                         if line[1] != "WORD"}
-warringer_luxiaodi = {strToFloat_luxiaodi(line[1]): 
+warringer_luxiaodi = {line[1]: 
         [strToFloat_luxiaodi(line[2]), strToFloat_luxiaodi(line[5]), 
                 strToFloat_luxiaodi(line[8])] for line in csv.reader(
-                    open('Ratings_Warriner_et_al.csv', "r"), delimiter=',') 
+                    open(fodir + 'Ratings_Warriner_et_al.csv', "r"), delimiter=',') 
                         if line[1] != "Word"}
 
 def extract1( comment ):
@@ -117,7 +119,7 @@ def extract1( comment ):
     # 7. Number of multi-character punctuation tokens
     feats[7] = len(multiPuncPattern_luxiaodi.findall(comment))
     # 8. Number of common nouns
-    feats[8] = len(commaPattern_luxiaodi.findall(comment))
+    feats[8] = len(commonNounPattern_luxiaodi.findall(comment))
     # 9. Number of proper nouns
     feats[9] = len(properNounPattern_luxiaodi.findall(comment))
     # Number of adverbs
@@ -131,7 +133,7 @@ def extract1( comment ):
     upperWords = upwordsPattern_luxiaodi.findall(comment)
     feats[13] = len(upperWords)
     # Average length of sentences, in tokens
-    sentences = comment.split('\n').strip()
+    sentences = comment.strip().split('\n')
     senCount = len(sentences)
     totalLen = 0
     for sent in sentences:
@@ -163,9 +165,11 @@ def extract1( comment ):
     warringerStats = [[], [], []]
 
     for token in tokens:
-        word, tag = token.rsplit("/")
+        word = token.rsplit("/")
+        # print(word)
+        word = word[0]
         if word in bGL_luxiaodi:
-            stats = GL_luxiaodi[word]
+            stats = bGL_luxiaodi[word]
             aoa.append(stats[0])
             img.append(stats[1])
             fam.append(stats[2])
@@ -212,7 +216,8 @@ def main( args ):
     lNpy = np.load(fodir + "../feats/Left_feats.dat.npy")
     rNpy = np.load(fodir + "../feats/Right_feats.dat.npy")
     aNpy = np.load(fodir + "../feats/Alt_feats.dat.npy")
-    npyData = cNpy + lNpy + rNpy + aNpy 
+
+    npyData = [cNpy, lNpy, rNpy, aNpy]
 
     cFptr = open(fodir + "../feats/Center_IDs.txt", "r")
     lFptr = open(fodir + "../feats/Left_IDs.txt", "r")
@@ -222,25 +227,31 @@ def main( args ):
     lLines = [x.strip() for x in lFptr.readlines() if x]
     rLines = [x.strip() for x in rFptr.readlines() if x]
     aLines = [x.strip() for x in aFptr.readlines() if x]
-    ids = cLines + lLines + rLines + aLines
+    ids = [cLines, lLines, rLines, aLines]
     cFptr.close()
     lFptr.close()
     rFptr.close()
     aFptr.close()
 
+    caToNum = {'Center': 1, 'Left': 0, 'Right': 2, 'Alt': 3}
     # loop through input
     for i in range(len(data)):
-        line = json.loads(data[i])
+        line = data[i]
         dataID = line["id"]
         featsExtracted = extract1(line["body"])
-
-        if dataID in ids:
-            rowNum = ids.index(dataID)
-        else:
-            feats[i] = featsExtracted
-            continue
-        featsExtracted[29:] = npyData[rowNum]
+        print(featsExtracted[:29])
+        for j in range(len(ids)):
+            if dataID in ids[j]:
+                rowNum = ids[j].index(dataID)
+                print("in here")
+            else:
+                feats[i] = featsExtracted
+                continue
+            featsExtracted[29:-1] = npyData[j][rowNum]
+            break
         feats[i] = featsExtracted
+        feats[i][173] = caToNum[line["cat"]]
+        # print(feats[i])
     np.savez_compressed( args.output, feats)
 
     
