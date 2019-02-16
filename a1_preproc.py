@@ -40,7 +40,7 @@ def preproc1( comment , steps=range(1,11)):
         modComm : string, the modified comment 
     '''
 
-    modComm = ''
+    modComm = comment
     if 1 in steps:
         # remove all newline char
         modComm = comment.replace('\n', '')
@@ -49,7 +49,11 @@ def preproc1( comment , steps=range(1,11)):
         modComm = html.unescape(modComm)
     if 3 in steps:
         #remove all URLs
-        modComm = re.sub(r'^https?:\/\/.*[\r\n]*', '', modComm, flags=re.MULTILINE)
+        modComm = modComm.split(" ")
+        for token in modComm:
+            if token.startswith('http') or token.startswith('www'):
+                modComm.remove(token)
+        modComm = " ".join(modComm)
     if 4 in steps:
         # split each punctuation
         punc = ""
@@ -60,13 +64,13 @@ def preproc1( comment , steps=range(1,11)):
                 punc += '\\'
         punc.replace('\'', '')
         regexStr = "(\d+[\,\.]\d+|[" + punc + "])+"
-        words = modComm.strip().split()
+        words = modComm.strip().split(" ")
         modComm = ''
         for item in words:
             if item not in abbrev_1001299944:
                 add = ' '.join([x.strip() for x in re.split(regexStr, item) if x])
                 modComm += add + " "      
-
+        modComm = modComm[:-1]
     if 5 in steps:
         # split clitics using whitespace
         regexStr = '(' + '|'.join(clitics_1001299944) + ')'
@@ -83,14 +87,15 @@ def preproc1( comment , steps=range(1,11)):
         modComm = modComm.strip()
     if 7 in steps:
         #remove stop words
-        regexStr = "\s((" + '|'.join(stopWords_1001299944) + ")\/[\S]+)"
-        re.sub(regexStr, "", ' ' + modComm)
+        modComm.split(' ')
         modComm = modComm.strip()
     if 8 in steps:
         #apply lemmatization using spaCy
-        words = modComm.strip().split()
+        words = modComm.strip().split(" ")
         modComm = ""
         for item in words:
+            if item == "" or item.strip() == "":
+                continue
             token, tag = item.rsplit("/", 1)
             utt = nlp_1001299944(token)
             if len(utt) > 0:
@@ -104,10 +109,12 @@ def preproc1( comment , steps=range(1,11)):
     if 9 in steps:
         #add a new line between sentence(endofsentence detection)
         eos = ".!?"
-        words = modComm.strip().split()
+        words = modComm.strip().split(" ")
         modComm = ''
         for w in range(len(words)):
             item = words[w]
+            if item == "" or item.strip() == "":
+                continue
             word, tag = item.strip().rsplit("/", 1)
             if len(word)>0 and (word in abbrev_1001299944 or tag in eos ):
                 if (w+1) >= len(words):
@@ -118,11 +125,12 @@ def preproc1( comment , steps=range(1,11)):
         modComm = " ".join(words)
     if 10 in steps:
         #convert text to lower case
-        words = modComm.strip().split()
+        words = modComm.strip().split(' ')
         modComm = ''
         for item in words:
-            word, tag = item.strip().rsplit("/", 1)
-            modComm += word.lower() + "/" + tag + " "
+            if '/' in item:
+                word, tag = item.rsplit("/", 1)
+                modComm += word.lower() + "/" + tag + " "
         modComm.strip()
         
     return modComm.strip()
@@ -185,5 +193,11 @@ if __name__ == "__main__":
         print( "Error: If you want to read more than 200,272 comments per file, you have to read them all." )
         sys.exit(1)
         
-    main(args)
+    # main(args)
+    for i in range(1, 11):
+        m = [i]
+        if i in [7, 8, 9]:
+            m = [6, i]
+        print(m)
+        print(preproc1("where have you been???\nWriting tests\n Prof. Col. ASKED me to go to http://www.naodi.com", steps=m))
 

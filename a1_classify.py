@@ -1,6 +1,6 @@
 from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import SelectKBest
-from sklearn.features_selection import f_classif
+from sklearn.feature_selection import f_classif
 from sklearn.feature_selection import chi2
 import numpy as np
 import argparse
@@ -152,14 +152,63 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
        X_1k: numPy array, just 1K rows of X_train (from task 3.2)
        y_1k: numPy array, just 1K rows of y_train (from task 3.2)
     '''
-    k = {5, 10, 20, 30, 40, 50}
-    
-    X_new = selector.fit_transform(X_train, y_train)
-    pp = selector.pvalues_
-    for i in k:
-        selector = SelectKBest(f_classif, k) 
+    kList = {5, 10, 20, 30, 40, 50}
+    csvResult = []
+    pval1 = []
+    pval32 = []
 
-    # print('TODO Section 3.3')
+    # find the best k features p values for 1k and 32k
+    for i in kList:
+        selector = SelectKBest(f_classif, k=i) 
+        X_new = selector.fit_transform(X_1k, y_1k)
+        pp = sorted(selector.pvalues_)
+        pval1.append(pp[:i])
+    print(pval1)
+
+    for i in kList:
+        selector = SelectKBest(f_classif, k=i) 
+        X_new = selector.fit_transform(X_train, y_train)
+        pp = sorted(selector.pvalues_)
+        pval32.append(pp[:i])
+        csvResult.append([i] + pp)
+    print(pval32)
+
+    # 1k and 32k with 5 features
+    selector = SelectKBest(f_classif, k=5) 
+    X_train1k = selector.fit_transform(X_1k, y_1k)
+    X_test1k = selector.transform(X_test)
+    
+    selector = SelectKBest(f_classif, k=5) 
+    X_train32k = selector.fit_transform(X_train, y_test)
+    X_test32k = selector.transform(X_test)
+
+    if iBest == 1:
+        model = LinearSVC(max_iter=10000)
+    elif iBest == 2:
+        model = SVC(max_iter=10000, gamma=2)
+    elif iBest == 3:
+        model = RandomForestClassifier(max_depth=5, n_estimators=10)
+    elif iBest == 4:
+        model = MLPClassifier(alpha=0.05)
+    else:
+        model = AdaBoostClassifier()
+
+    accuracies = []
+    model.fit(X_train1k, y_1k)
+    y_predict1k = model.predict(X_test1k)
+    accuracies.append(accuracy(confusion_matrix(y_test, y_predict1k, label=[0, 1, 2, 3])))
+        
+    model.fit(X_train32k, y_train)
+    y_predict32k = model.predict(X_test32k)
+    accuracies.append(accuracy(confusion_matrix(y_test, y_predict32k, label=[0, 1, 2, 3])))
+
+    csvResult.append(accuracies)
+
+    with open("a1_3.3.csv", "w", newline="") as csvFile:
+        csvWriter = csv.writer(csvFile)
+        csvWriter.writerows(csvResult)
+
+
 
 def class34( filename, i ):
     ''' This function performs experiment 3.4

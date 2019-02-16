@@ -13,25 +13,25 @@ def strToFloat_luxiaodi(data):
     if data != "":
         r = float(data)
     return r
-# fodir = '/u/cs401/Wordlists/'
-fodir = './wordlists/'
+# fodir_1001299944 = '/u/cs401/Wordlists/'
+fodir_1001299944 = './wordlists/'
 
-fptr_luxiaodi = open(fodir+'First-person')
+fptr_luxiaodi = open(fodir_1001299944+'First-person')
 firstP_luxiaodi = fptr_luxiaodi.readlines()
 firstP_luxiaodi = [x.lower().strip() for x in firstP_luxiaodi]
 fptr_luxiaodi.close()
 
-fptr_luxiaodi = open(fodir+'Second-person')
+fptr_luxiaodi = open(fodir_1001299944+'Second-person')
 secP_luxiaodi = fptr_luxiaodi.readlines()
 secP_luxiaodi = [x.lower().strip() for x in secP_luxiaodi]
 fptr_luxiaodi.close()
 
-fptr_luxiaodi = open(fodir+'Third-person')
+fptr_luxiaodi = open(fodir_1001299944+'Third-person')
 thirdP_luxiaodi = fptr_luxiaodi.readlines()
 thirdP_luxiaodi = [x.lower().strip() for x in thirdP_luxiaodi]
 fptr_luxiaodi.close()
 
-fptr_luxiaodi = open(fodir+'Slang')
+fptr_luxiaodi = open(fodir_1001299944+'Slang')
 slang_luxiaodi = fptr_luxiaodi.readlines()
 slang_luxiaodi = [x.lower().strip() for x in slang_luxiaodi]
 fptr_luxiaodi.close()
@@ -78,12 +78,12 @@ bGL_luxiaodi = {line[1]:
         [strToFloat_luxiaodi(line[3]), strToFloat_luxiaodi(line[4]), 
         strToFloat_luxiaodi(line[5])] 
         for line in csv.reader(
-            open(fodir + 'BristolNorms+GilhoolyLogie.csv', "r"), delimiter=',') 
+            open(fodir_1001299944 + 'BristolNorms+GilhoolyLogie.csv', "r"), delimiter=',') 
                         if line[1] != "WORD"}
 warringer_luxiaodi = {line[1]: 
         [strToFloat_luxiaodi(line[2]), strToFloat_luxiaodi(line[5]), 
                 strToFloat_luxiaodi(line[8])] for line in csv.reader(
-                    open(fodir + 'Ratings_Warriner_et_al.csv', "r"), delimiter=',') 
+                    open(fodir_1001299944 + 'Ratings_Warriner_et_al.csv', "r"), delimiter=',') 
                         if line[1] != "Word"}
 
 def extract1( comment ):
@@ -212,17 +212,17 @@ def main( args ):
     data = json.load(open(args.input))
     feats = np.zeros( (len(data), 173+1))
 
-    cNpy = np.load(fodir + "../feats/Center_feats.dat.npy")
-    lNpy = np.load(fodir + "../feats/Left_feats.dat.npy")
-    rNpy = np.load(fodir + "../feats/Right_feats.dat.npy")
-    aNpy = np.load(fodir + "../feats/Alt_feats.dat.npy")
+    cNpy = np.load(fodir_1001299944 + "../feats/Center_feats.dat.npy")
+    lNpy = np.load(fodir_1001299944 + "../feats/Left_feats.dat.npy")
+    rNpy = np.load(fodir_1001299944 + "../feats/Right_feats.dat.npy")
+    aNpy = np.load(fodir_1001299944 + "../feats/Alt_feats.dat.npy")
 
     npyData = [cNpy, lNpy, rNpy, aNpy]
 
-    cFptr = open(fodir + "../feats/Center_IDs.txt", "r")
-    lFptr = open(fodir + "../feats/Left_IDs.txt", "r")
-    rFptr = open(fodir + "../feats/Right_IDs.txt", "r")
-    aFptr = open(fodir + "../feats/Alt_IDs.txt", "r")
+    cFptr = open(fodir_1001299944 + "../feats/Center_IDs.txt", "r")
+    lFptr = open(fodir_1001299944 + "../feats/Left_IDs.txt", "r")
+    rFptr = open(fodir_1001299944 + "../feats/Right_IDs.txt", "r")
+    aFptr = open(fodir_1001299944 + "../feats/Alt_IDs.txt", "r")
     cLines = [x.strip() for x in cFptr.readlines() if x]
     lLines = [x.strip() for x in lFptr.readlines() if x]
     rLines = [x.strip() for x in rFptr.readlines() if x]
@@ -261,7 +261,6 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output", help="Directs the output to a filename of your choice", required=True)
     parser.add_argument("-i", "--input", help="The input JSON file, preprocessed as in Task 1", required=True)
     args = parser.parse_args()
-                 
-
+    # print(extract1(",/, merely/RB reactivation/NN entry/NN -/HYPH exit/NN tracking/NN system/NN border/NN country/NNS deem/VBD risk/NN ./.\n obama/NNP 's/POS administration/NN remove/VBD country/NNS risk/NN list/NN system/NN inactive/NN 2011also/RB :/: religion/NN ,/, technically/RB registry/JJ")) 
     main(args)
 
