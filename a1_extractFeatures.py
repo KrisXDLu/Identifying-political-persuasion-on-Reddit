@@ -13,8 +13,8 @@ def strToFloat_luxiaodi(data):
     if data != "":
         r = float(data)
     return r
-# fodir_1001299944 = '/u/cs401/Wordlists/'
-fodir_1001299944 = './wordlists/'
+fodir_1001299944 = '/u/cs401/Wordlists/'
+# fodir_1001299944 = './wordlists/'
 
 fptr_luxiaodi = open(fodir_1001299944+'First-person')
 firstP_luxiaodi = fptr_luxiaodi.readlines()
@@ -219,10 +219,12 @@ def main( args ):
 
     npyData = [cNpy, lNpy, rNpy, aNpy]
 
-    cFptr = open(fodir_1001299944 + "../feats/Center_IDs.txt", "r")
-    lFptr = open(fodir_1001299944 + "../feats/Left_IDs.txt", "r")
-    rFptr = open(fodir_1001299944 + "../feats/Right_IDs.txt", "r")
-    aFptr = open(fodir_1001299944 + "../feats/Alt_IDs.txt", "r")
+    featsdir = '/u/cs401/A1/'
+    # featsdir = './'
+    cFptr = open(featsdir + "feats/Center_IDs.txt", "r")
+    lFptr = open(featsdir + "feats/Left_IDs.txt", "r")
+    rFptr = open(featsdir + "feats/Right_IDs.txt", "r")
+    aFptr = open(featsdir + "feats/Alt_IDs.txt", "r")
     cLines = [x.strip() for x in cFptr.readlines() if x]
     lLines = [x.strip() for x in lFptr.readlines() if x]
     rLines = [x.strip() for x in rFptr.readlines() if x]
@@ -239,11 +241,11 @@ def main( args ):
         line = data[i]
         dataID = line["id"]
         featsExtracted = extract1(line["body"])
-        print(featsExtracted[:29])
+        # print(featsExtracted[:29])
         for j in range(len(ids)):
             if dataID in ids[j]:
                 rowNum = ids[j].index(dataID)
-                print("in here")
+                # print("in here")
             else:
                 feats[i] = featsExtracted
                 continue
