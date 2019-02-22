@@ -1,0 +1,2 @@
+0.32775,0.38275,0.394,0.399375,0.4015
+The accuracy increases as the training size increases probably because we are providing more data and features for the classifier to analyze. There is a sign of possible overfitting from 10k to 15k. and The accuracy increases from 15k to 20k because more data means noises in the data are less significant overall.

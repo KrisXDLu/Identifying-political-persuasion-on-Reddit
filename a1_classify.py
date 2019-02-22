@@ -158,22 +158,36 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
     csvResult = []
     pval1 = []
     pval32 = []
-
+    best1k = {}
+    best32k = {}
     # find the best k features p values for 1k and 32k
     for i in kList:
         selector = SelectKBest(f_classif, k=i) 
         X_new = selector.fit_transform(X_1k, y_1k)
         pp = sorted(selector.pvalues_)
         pval1.append(pp[:i])
-    print(pval1)
+        mask = selector.get_support()
+        features = []
+        for j in range(len(mask)):
+            if mask[j]:
+                features.append(j)
+        best1k[i] = features
+    print(best1k)
 
     for i in kList:
         selector = SelectKBest(f_classif, k=i) 
         X_new = selector.fit_transform(X_train, y_train)
         pp = sorted(selector.pvalues_)
         pval32.append(pp[:i])
-        csvResult.append([i] + pp)
-    print(pval32)
+        csvResult.append([i] + pp[:i])
+        mask = selector.get_support()
+        features = []
+        for j in range(len(mask)):
+            if mask[j]:
+                features.append(j)
+        best32k[i] = features
+    print(best32k)
+    # print(pval32)
 
     # 1k and 32k with 5 features
     selector = SelectKBest(f_classif, k=5) 
@@ -200,11 +214,11 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
     accuracies = []
     model.fit(X_train1k, y_1k)
     y_predict1k = model.predict(X_test1k)
-    accuracies.append(accuracy(confusion_matrix(y_test, y_predict1k, label=[0, 1, 2, 3])))
+    accuracies.append(accuracy(confusion_matrix(y_test, y_predict1k, labels=[0, 1, 2, 3])))
         
     model.fit(X_train32k, y_train)
     y_predict32k = model.predict(X_test32k)
-    accuracies.append(accuracy(confusion_matrix(y_test, y_predict32k, label=[0, 1, 2, 3])))
+    accuracies.append(accuracy(confusion_matrix(y_test, y_predict32k, labels=[0, 1, 2, 3])))
 
     csvResult.append(accuracies)
 
@@ -223,8 +237,8 @@ def class34( filename, i ):
         '''
     # load data from file and turn y into list
     data = np.load(filename)    
-    X = data[:,:-1]
-    y = data[:,-1]
+    X = data["arr_0"][:,:-1]
+    y = data["arr_0"][:,-1:]
     # print(y)
     y = np.ravel(y)
 
@@ -236,7 +250,7 @@ def class34( filename, i ):
         MLPClassifier(alpha=0.05),
         AdaBoostClassifier()]
 
-    data = KFold(n_splits=5, random_state=1, shuffle=True)
+    kf = KFold(n_splits=5, random_state=1, shuffle=True)
     k = 0
     # crossvalidation with 5 fold
     for train_index, test_index in kf.split(X):
@@ -264,9 +278,9 @@ def class34( filename, i ):
     with open("a1_3.4.csv", "w", newline="") as csvFile:
         csvWriter = csv.writer(csvFile)
         csvWriter.writerows(result)
-        csvWriter.writerows(sList)
-        csvWriter.writerows(["pvalue for best classifier from 3.1 is: " + S[0] 
-                    + ""])
+        csvWriter.writerow(sList)
+        # csvWriter.writerows(["pvalue for best classifier from 3.1 is: " + S[0].tolist() 
+        #             + ""])
 
 
 if __name__ == "__main__":
@@ -277,6 +291,18 @@ if __name__ == "__main__":
     # TODO : complete each classification experiment, in sequence.
     X_train, X_test, y_train, y_test, iBest = class31(args.input)
     X_1k, y_1k = class32(X_train, X_test, y_train, y_test,iBest)
+    # data = np.load(args.input)
+    # data = data['arr_0']
+
+    # # getting y value
+    # X = data[:,:-1]
+    # y = data[:,-1]
+
+    # # splitting data into test and training 20%,80% 
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=66)
+    # iBest = 5
+    # X_1k = np.array(X_train[:1000]) 
+    # y_1k = np.array(y_train[:1000])
     class33(X_train, X_test, y_train, y_test, iBest, X_1k, y_1k)
     class34(args.input, iBest)
 
